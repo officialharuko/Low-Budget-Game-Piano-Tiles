@@ -1,80 +1,759 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-    <title>Piano-Tiles</title>
-<style>
-    #btn{
-        position: absolute;
-        top: 700;
-        left: 36%;
-        width: 300px;
-        height: 50px;
-    }
-    #start_btn {
-        position: relative;
-        top: 50%;
-        left: 50%;
-        margin-left: -50px;
-        margin-top: -50px;
-        display: block;
-        font-size: 1.3em;
-        width: 100px;
-        height: 100px;
-        font-weight: light;
-        font-family: 'Trebuchet MS', sans-serif;
-        text-align: center;
-        line-height: 100px;
-        letter-spacing: -1px;
-        color: white;
-        border: none;
-        border-radius: 50%;
-        background: #5a99d4;
-        cursor: pointer;
-        box-shadow: 0 0 0 0 rgba(#5a99d4, .5);
-        transition: width 0.9s, height 0.9s ;
-    }
-    #start_btn:hover{
-        width: 105px;
-        height: 105px;
-    }
-    body {
-        background: #36D1DC;  /* fallback for old browsers */
-        background: -webkit-linear-gradient(to right, #5B86E5, #36D1DC);  /* Chrome 10-25, Safari 5.1-6 */
-        background: linear-gradient(to right, #5B86E5, #36D1DC); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-
-    }
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Piano Tiles</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --secondary: #1e40af;
+            --accent: #93c5fd;
+        }
+        
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: #f8fafc;
+            overflow-x: hidden;
+            user-select: none;
+            transition: background-color 0.3s;
+        }
+        
+        .tile {
+            width: 100%;
+            height: 100px;
+            background-color: #1e293b;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 -3px 0 rgba(0,0,0,0.2) inset;
+            position: relative;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+        .tile::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 20px;
+            background-color: inherit;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .tile.active {
+            background-color: var(--primary);
+        }
+        
+        .tile.hit {
+            background-color: var(--accent);
+            transform: scale(0.95);
+        }
+        
+        .tile.missed {
+            background-color: #ef4444;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-100px); }
+            to { transform: translateY(calc(100vh + 100px)); }
+        }
+        
+        .game-container {
+            perspective: 1000px;
+        }
+        
+        .faculty-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        /* Faculty specific themes */
+        .theme-computer-engineering {
+            --primary: #3b82f6;
+            --secondary: #1e40af;
+            --accent: #93c5fd;
+        }
+        
+        .theme-accounting {
+            --primary: #10b981;
+            --secondary: #047857;
+            --accent: #6ee7b7;
+        }
+        
+        .theme-multimedia-arts {
+            --primary: #a855f7;
+            --secondary: #7e22ce;
+            --accent: #c084fc;
+        }
+        
+        .theme-computer-science {
+            --primary: #6366f1;
+            --secondary: #4f46e5;
+            --accent: #a5b4fc;
+        }
+        
+        .theme-it {
+            --primary: #f59e0b;
+            --secondary: #d97706;
+            --accent: #fcd34d;
+        }
+        
+        .theme-culinary {
+            --primary: #ef4444;
+            --secondary: #dc2626;
+            --accent: #fca5a5;
+        }
+        
+        .theme-tourism {
+            --primary: #06b6d4;
+            --secondary: #0891b2;
+            --accent: #67e8f9;
+        }
+    </style>
 </head>
-<body>
-    <canvas id="score_bar" width="300" height="70" style="position: absolute; left:36%;top: 0;"></canvas>
-    <canvas id="background" width="300" height="600" style="position: absolute; top:70; left: 36%;" ></canvas>
-    <canvas id="piano" width="300" height="600" style="position: absolute; top:70; left: 36%;"></canvas>
-    <audio  id="music" src="MUSIC.mp3" loop ></audio>
-
-    <div id="btn">
-        <span id="start_btn">START</span>
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+    <div id="faculty-selector" class="w-full max-w-4xl">
+        <h1 class="text-5xl font-bold text-center mb-8 text-gray-800">Faculty Piano Tiles</h1>
+        <p class="text-center text-lg mb-12 text-gray-600">Choose your faculty and test your skills!</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Computer Engineering -->
+            <div class="faculty-card bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl p-6 cursor-pointer transition-all duration-300 shadow-lg"
+                 onclick="showBoosters('computer-engineering')">
+                <div class="flex items-center mb-4">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/9f3ee453-176a-4d20-b4bb-b1f40ee3fc7f.png" alt="Circuit board with glowing blue pathways and microchips on a dark background" class="w-12 h-12 rounded-full mr-4" />
+                    <h2 class="text-xl font-bold text-white">Computer Engineering</h2>
+                </div>
+                <p class="text-blue-100 mb-4">Test your precision with advanced tech challenges.</p>
+                <ul class="text-blue-100 text-sm space-y-1">
+                    <li>• Algorithmic patterns</li>
+                    <li>• Circuit timing challenges</li>
+                    <li>• Hardware synchronization</li>
+                </ul>
+            </div>
+            
+            <!-- Accounting -->
+            <div class="faculty-card bg-gradient-to-br from-green-500 to-green-700 rounded-xl p-6 cursor-pointer transition-all duration-300 shadow-lg"
+                 onclick="showBoosters('accounting')">
+                <div class="flex items-center mb-4">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/c6612f3c-e1db-493e-98cd-9d1bac6add35.png" alt="Calculator with digital numbers on a green background with financial charts" class="w-12 h-12 rounded-full mr-4" />
+                    <h2 class="text-xl font-bold text-white">Accounting</h2>
+                </div>
+                <p class="text-green-100 mb-4">Balance your skills with financial precision.</p>
+                <ul class="text-green-100 text-sm space-y-1">
+                    <li>• Quick calculation tiles</li>
+                    <li>• Budget balancing mode</li>
+                    <li>• Tax season rush</li>
+                </ul>
+            </div>
+            
+            <!-- Multimedia Arts -->
+            <div class="faculty-card bg-gradient-to-br from-purple-500 to-purple-700 rounded-xl p-6 cursor-pointer transition-all duration-300 shadow-lg"
+                 onclick="startGame('multimedia-arts')">
+                <div class="flex items-center mb-4">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/05a7decd-af3b-433c-91d0-609f25cddc38.png" alt="Colorful digital art palette with paint brushes and digital devices" class="w-12 h-12 rounded-full mr-4" />
+                    <h2 class="text-xl font-bold text-white">Multimedia Arts</h2>
+                </div>
+                <p class="text-purple-100 mb-4">Express your creativity through rhythm.</p>
+                <ul class="text-purple-100 text-sm space-y-1">
+                    <li>• Creative color patterns</li>
+                    <li>• Artistic timing challenges</li>
+                    <li>• Design-inspired tiles</li>
+                </ul>
+            </div>
+            
+            <!-- Computer Science -->
+            <div class="faculty-card bg-gradient-to-br from-indigo-500 to-indigo-700 rounded-xl p-6 cursor-pointer transition-all duration-300 shadow-lg"
+                 onclick="startGame('computer-science')">
+                <div class="flex items-center mb-4">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/9a299a8b-599b-4374-ad87-db428a089495.png" alt="Abstract coding environment with syntax highlighting on dark background" class="w-12 h-12 rounded-full mr-4" />
+                    <h2 class="text-xl font-bold text-white">Computer Science</h2>
+                </div>
+                <p class="text-indigo-100 mb-4">Master the rhythm of algorithms.</p>
+                <ul class="text-indigo-100 text-sm space-y-1">
+                    <li>• Algorithmic patterns</li>
+                    <li>• Binary speed mode</li>
+                    <li>• Debugging challenges</li>
+                </ul>
+            </div>
+            
+            <!-- IT -->
+            <div class="faculty-card bg-gradient-to-br from-yellow-500 to-yellow-700 rounded-xl p-6 cursor-pointer transition-all duration-300 shadow-lg"
+                 onclick="startGame('it')">
+                <div class="flex items-center mb-4">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/0e9acd11-b1e4-4632-8468-0cc161d11ea7.png" alt="Server rack with blinking lights and network connections" class="w-12 h-12 rounded-full mr-4" />
+                    <h2 class="text-xl font-bold text-white">IT</h2>
+                </div>
+                <p class="text-yellow-100 mb-4">Keep the network flowing with perfect timing.</p>
+                <ul class="text-yellow-100 text-sm space-y-1">
+                    <li>• Network packet timing</li>
+                    <li>• Server response challenges</li>
+                    <li>• Tech support quick fixes</li>
+                </ul>
+            </div>
+            
+            <!-- Culinary -->
+            <div class="faculty-card bg-gradient-to-br from-red-500 to-red-700 rounded-xl p-6 cursor-pointer transition-all duration-300 shadow-lg"
+                 onclick="startGame('culinary')">
+                <div class="flex items-center mb-4">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/b927ee23-75e6-491b-abf4-d71754ce7354.png" alt="Colorful array of ingredients and cooking utensils on a kitchen counter" class="w-12 h-12 rounded-full mr-4" />
+                    <h2 class="text-xl font-bold text-white">Culinary</h2>
+                </div>
+                <p class="text-red-100 mb-4">Cook up the perfect rhythm.</p>
+                <ul class="text-red-100 text-sm space-y-1">
+                    <li>• Recipe timing challenges</li>
+                    <li>• Kitchen coordination mode</li>
+                    <li>• Food prep rhythms</li>
+                </ul>
+            </div>
+            
+            <!-- Tourism -->
+            <div class="faculty-card bg-gradient-to-br from-cyan-500 to-cyan-700 rounded-xl p-6 cursor-pointer transition-all duration-300 shadow-lg"
+                 onclick="startGame('tourism')">
+                <div class="flex items-center mb-4">
+                    <img src="https://storage.googleapis.com/workspace-0f70711f-8b4e-4d94-86f1-2a93ccde5887/image/9c0cfe55-a10b-428d-b9a5-248738b60399.png" alt="Beautiful tropical beach with palm trees and clear blue water" class="w-12 h-12 rounded-full mr-4" />
+                    <h2 class="text-xl font-bold text-white">Tourism</h2>
+                </div>
+                <p class="text-cyan-100 mb-4">Travel the world through music.</p>
+                <ul class="text-cyan-100 text-sm space-y-1">
+                    <li>• Global destination themes</li>
+                    <li>• Travel itinerary timing</li>
+                    <li>• Multi-cultural rhythm challenges</li>
+                </ul>
+            </div>
+        </div>
     </div>
-    <!-- Hamburger Menu -->
-<div id="hamburger-menu" style="position: absolute; top: 15px; left: 15px; z-index: 100;">
-  <div id="hamburger-icon" style="width: 30px; height: 30px; cursor: pointer;">
-    <div style="width: 100%; height: 5px; background: #333; margin: 6px 0;"></div>
-    <div style="width: 100%; height: 5px; background: #333; margin: 6px 0;"></div>
-    <div style="width: 100%; height: 5px; background: #333; margin: 6px 0;"></div>
-  </div>
-  <div id="menu-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:101;">
-    <div style="background:#fff; width:200px; padding:20px; margin:40px auto; border-radius:8px;">
-      <h3>Menu</h3>
-      <ul style="list-style:none; padding:0;">
-        <li><button onclick="location.reload()">Restart</button></li>
-        <li><button onclick="document.getElementById('menu-overlay').style.display='none'">Close</button></li>
-      </ul>
+    
+    <div id="game-screen" class="hidden w-full h-screen fixed top-0 left-0 p-4 game-container">
+        <div class="flex justify-between items-center mb-4">
+            <button onclick="endGame()" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition">Exit</button>
+            <div class="flex gap-4 text-white">
+                <div class="bg-white/20 px-4 py-2 rounded-lg">Score: <span id="score">0</span></div>
+                <div class="bg-white/20 px-4 py-2 rounded-lg">Combo: <span id="combo">0</span>x</div>
+            </div>
+        </div>
+        
+        <div class="grid grid-cols-4 gap-4 w-full max-w-4xl mx-auto">
+            <div class="column" data-key="a">
+                <div class="tile hidden"></div>
+            </div>
+            <div class="column" data-key="s">
+                <div class="tile hidden"></div>
+            </div>
+            <div class="column" data-key="d">
+                <div class="tile hidden"></div>
+            </div>
+            <div class="column" data-key="f">
+                <div class="tile hidden"></div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
-    <script src="game.js"></script>
-<script>
- 
+    
+    <div id="booster-select" class="hidden fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black/80 z-40">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full text-center">
+            <h2 class="text-3xl font-bold mb-4">Select Boosters</h2>
+            <div class="grid grid-cols-1 gap-4 mb-6">
+                <div class="booster-option p-4 rounded-lg border cursor-pointer hover:bg-gray-50" onclick="selectBooster(0)">
+                    <h3 class="font-bold">Algorithm Accelerator</h3>
+                    <p class="text-sm">Patterns become more predictable</p>
+                </div>
+                <div class="booster-option p-4 rounded-lg border cursor-pointer hover:bg-gray-50" onclick="selectBooster(1)">
+                    <h3 class="font-bold">Timing Tuner</h3>
+                    <p class="text-sm">Extra time to hit tiles</p>
+                </div>
+                <div class="booster-option p-4 rounded-lg border cursor-pointer hover:bg-gray-50" onclick="selectBooster(2)">
+                    <h3 class="font-bold">Combo Multiplier</h3>
+                    <p class="text-sm">Higher combo bonuses</p>
+                </div>
+            </div>
+            <button onclick="startGame()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition w-full">Start Game</button>
+        </div>
+    </div>
 
-</script>
+    <div id="game-over" class="hidden fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black/80 z-50">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full text-center">
+            <h2 class="text-3xl font-bold mb-4">Game Over!</h2>
+            <p class="text-xl mb-2">Your score: <span id="final-score" class="font-bold">0</span></p>
+            <p class="text-lg mb-6">Highest combo: <span id="final-combo" class="font-bold">0</span>x</p>
+            <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition w-full">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let gameState = {
+            running: false,
+            score: 0,
+            combo: 0,
+            maxCombo: 0,
+            speed: 1500,
+            minSpeed: 500,
+            currentFaculty: '',
+            tileCount: 0,
+            tiles: [],
+            pressHandler: null,
+            tileInterval: null
+        };
+        
+        // Faculty data
+        const facultyData = {
+            'computer-engineering': {
+                name: 'Computer Engineering',
+                keys: ['a', 's', 'd', 'f'],
+                speedReduction: 70,
+                specialPatterns: [
+                    [0, 1, 2, 3],
+                    [3, 2, 1, 0],
+                    [0, 3, 1, 2]
+                ],
+                accent: 'var(--accent)'
+            },
+            'accounting': {
+                name: 'Accounting',
+                keys: ['a', 's', 'd', 'f'],
+                speedReduction: 60,
+                specialPatterns: [
+                    [0, 0, 1, 1, 2, 2, 3, 3],
+                    [0, 1, 2, 3, 3, 2, 1, 0],
+                    [0, 0, 3, 3, 1, 1, 2, 2]
+                ],
+                accent: 'var(--accent)'
+            },
+            'multimedia-arts': {
+                name: 'Multimedia Arts',
+                keys: ['a', 's', 'd', 'f'],
+                speedReduction: 80,
+                specialPatterns: [
+                    [0, 1, 2, 3, 3, 2, 1, 0, 2, 1, 0, 3],
+                    [0, 3, 1, 2],
+                    [1, 1, 3, 3, 2, 2, 0, 0]
+                ],
+                accent: 'var(--accent)'
+            },
+            'computer-science': {
+                name: 'Computer Science',
+                keys: ['a', 's', 'd', 'f'],
+                speedReduction: 90,
+                specialPatterns: [
+                    [0, 1, 0, 1, 2, 3, 2, 3],
+                    [0, 1, 2, 3, 0, 1, 2, 3],
+                    [3, 3, 2, 2, 1, 1, 0, 0]
+                ],
+                accent: 'var(--accent)'
+            },
+            'it': {
+                name: 'IT',
+                keys: ['a', 's', 'd', 'f'],
+                speedReduction: 75,
+                specialPatterns: [
+                    [0, 1, 0, 3, 1, 2, 0, 3],
+                    [1, 1, 3, 3, 0, 2, 2, 0],
+                    [3, 1, 3, 1, 2, 0, 2, 0]
+                ],
+                accent: 'var(--accent)'
+            },
+            'culinary': {
+                name: 'Culinary',
+                keys: ['a', 's', 'd', 'f'],
+                speedReduction: 65,
+                specialPatterns: [
+                    [0, 3, 2, 1, 0, 3, 2, 1],
+                    [0, 0, 2, 2, 1, 1, 3, 3],
+                    [3, 2, 1, 0, 3, 2, 1, 0]
+                ],
+                accent: 'var(--accent)'
+            },
+            'tourism': {
+                name: 'Tourism',
+                keys: ['a', 's', 'd', 'f'],
+                speedReduction: 85,
+                specialPatterns: [
+                    [0, 1, 2, 3, 0, 1, 2, 3],
+                    [3, 2, 1, 0, 3, 2, 1, 0],
+                    [0, 3, 2, 1, 0, 3, 2, 1]
+                ],
+                accent: 'var(--accent)'
+            }
+        };
+        
+        // Key map for touch controls
+        const keyMap = {
+            'a': 0,
+            's': 1,
+            'd': 2,
+            'f': 3
+        };
+        
+        // Booster setup
+        let selectedBooster = null;
+        const boosters = {
+            'computer-engineering': [
+                { name: 'Binary Boost', effect: 'simplify patterns' },
+                { name: 'Clock Sync', effect: 'slow animations' },
+                { name: 'Parallel Processing', effect: 'double score' }
+            ],
+            'accounting': [
+                { name: 'Tax Deduction', effect: 'reduce penalties' },
+                { name: 'Quick Books', effect: 'faster combos' },
+                { name: 'Golden Ratio', effect: 'perfect sequences' }
+            ],
+            'multimedia-arts': [
+                { name: 'Design Palette', effect: 'custom starting tiles' },
+                { name: 'Creative Flow', effect: 'randomized patterns' },
+                { name: 'Artist Touch', effect: 'grace period' }
+            ],
+            'computer-science': [
+                { name: 'Debug Mode', effect: 'highlight correct tiles' },
+                { name: 'Algorithm Boost', effect: 'predictable sequences' },
+                { name: 'Syntax Helper', effect: 'one free miss' }
+            ],
+            'it': [
+                { name: 'Hotfix', effect: 'immediate recovery' },
+                { name: 'Server Boost', effect: 'faster gameplay' },
+                { name: 'Network Lag', effect: 'slow motion' }
+            ],
+            'culinary': [
+                { name: 'Sous Chef', effect: 'auto-hit simple tiles' },
+                { name: 'Flavor Boost', effect: 'bonus points' },
+                { name: 'Master Recipe', effect: 'predictable patterns' }
+            ],
+            'tourism': [
+                { name: 'Jet Lag', effect: 'slow start' },
+                { name: 'First Class', effect: 'point multiplier' },
+                { name: 'Guided Tour', effect: 'highlight path' }
+            ]
+        };
+
+        function showBoosters(faculty) {
+            gameState.currentFaculty = faculty;
+            // Update booster options based on faculty
+            document.querySelectorAll('.booster-option h3').forEach((el, i) => {
+                el.textContent = boosters[faculty][i].name;
+            });
+            document.getElementById('booster-select').classList.remove('hidden');
+        }
+
+        function selectBooster(index) {
+            selectedBooster = index;
+            document.querySelectorAll('.booster-option').forEach(el => {
+                el.classList.remove('bg-blue-100', 'border-blue-400');
+            });
+            document.querySelectorAll('.booster-option')[index].classList.add('bg-blue-100', 'border-blue-400');
+        }
+
+        // Start game with selected booster
+        function startGame() {
+            if (selectedBooster === null) return;
+            gameState.running = true;
+            gameState.score = 0;
+            gameState.combo = 0;
+            gameState.maxCombo = 0;
+            gameState.speed = 1500;
+            gameState.tileCount = 0;
+            gameState.tiles = [];
+            
+            // Set theme
+            document.body.className = `min-h-screen flex flex-col items-center justify-center p-4 theme-${gameState.currentFaculty}`;
+            
+            // Hide selector, show game
+            document.getElementById('faculty-selector').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            document.getElementById('booster-select').classList.add('hidden'); // <-- Add this line
+            
+            // Update display
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('combo').textContent = gameState.combo;
+            
+            // Create tile interval
+            gameState.tileInterval = setInterval(createTile, gameState.speed);
+            
+            // Initialize keyboard and touch controls
+            initControls();
+        }
+        
+        // Create a new tile
+        function createTile() {
+            gameState.tileCount++;
+            
+            // Get random column based on faculty difficulty
+            const faculty = facultyData[gameState.currentFaculty];
+            let columnIndex;
+            
+            // Every 10 tiles, use a special pattern
+            if (gameState.tileCount % 10 === 0 && gameState.tileCount > 0) {
+                const pattern = faculty.specialPatterns[Math.floor(Math.random() * faculty.specialPatterns.length)];
+                pattern.forEach((colIdx, i) => {
+                    setTimeout(() => {
+                        const column = document.querySelectorAll('.column')[colIdx];
+                        const tile = document.createElement('div');
+                        tile.className = 'tile active';
+                        tile.dataset.active = 'true';
+                        tile.style.animation = `slideDown ${gameState.speed*0.9}ms linear`;
+                        
+                        column.appendChild(tile);
+                        gameState.tiles.push({
+                            element: tile,
+                            column: colIdx,
+                            hit: false
+                        });
+                        
+                        // Remove tile after animation
+                        setTimeout(() => {
+                            if (column.contains(tile) && tile.dataset.active === 'true') {
+                                tile.classList.remove('active');
+                                tile.classList.add('missed');
+                                gameOver();
+                            }
+                        }, gameState.speed*0.9);
+                    }, i * 200);
+                });
+            } else {
+                columnIndex = Math.floor(Math.random() * 4);
+                const column = document.querySelectorAll('.column')[columnIndex];
+                const tile = document.createElement('div');
+                tile.className = 'tile active';
+                tile.dataset.active = 'true';
+                
+                // Apply faculty-specific tile appearance
+                if(gameState.currentFaculty === 'multimedia-arts' && selectedBooster === 0) {
+                    tile.style.backgroundColor = randomColor();
+                }
+                
+                // Adjust animation based on booster
+                let animationSpeed = gameState.speed * 0.9;
+                if(gameState.currentFaculty === 'it' && selectedBooster === 2) {
+                    animationSpeed *= 1.5; // Network Lag - slow motion
+                }
+                tile.style.animation = `slideDown ${animationSpeed}ms linear`;
+                
+                column.appendChild(tile);
+                gameState.tiles.push({
+                    element: tile,
+                    column: columnIndex,
+                    hit: false
+                });
+                
+                // Remove tile after animation
+                setTimeout(() => {
+                    if (column.contains(tile) && tile.dataset.active === 'true') {
+                        tile.classList.remove('active');
+                        tile.classList.add('missed');
+                        gameOver();
+                    }
+                }, gameState.speed*0.9);
+            }
+            
+            // Increase speed gradually (adjust based on booster)
+            let speedReduction = facultyData[gameState.currentFaculty].speedReduction;
+            if (selectedBooster === 1) { // Timing booster
+                speedReduction = Math.floor(speedReduction * 0.8);
+            }
+            if (gameState.speed > facultyData[gameState.currentFaculty].minSpeed) {
+                gameState.speed -= speedReduction;
+                clearInterval(gameState.tileInterval);
+                gameState.tileInterval = setInterval(createTile, gameState.speed);
+            }
+        }
+        
+        // Handle key/touch press
+        function handlePress(key) {
+            if (!gameState.running) return;
+            
+            const columnIdx = keyMap[key];
+            if (columnIdx === undefined) return;
+            
+            // Highlight pressed key
+            const column = document.querySelectorAll('.column')[columnIdx];
+            column.classList.add('brightness-125');
+            setTimeout(() => column.classList.remove('brightness-125'), 100);
+            
+            // Find the lowest active tile in this column
+            let lowestTile = null;
+            for (let i = 0; i < gameState.tiles.length; i++) {
+                const tile = gameState.tiles[i];
+                if (tile.column === columnIdx && tile.dataset.active === 'true' && !tile.hit) {
+                    if (!lowestTile || tile.element.offsetTop > lowestTile.element.offsetTop) {
+                        lowestTile = tile;
+                    }
+                }
+            }
+            
+            if (lowestTile) {
+                // Check if tile is in the hit zone (bottom 25% of screen)
+                const tileRect = lowestTile.element.getBoundingClientRect();
+                const hitZoneTop = window.innerHeight * 0.75;
+                
+                if (tileRect.top >= hitZoneTop && tileRect.bottom <= window.innerHeight) {
+                    // Successful hit
+                    lowestTile.hit = true;
+                    lowestTile.element.dataset.active = 'false';
+                    lowestTile.element.classList.remove('active');
+                    lowestTile.element.classList.add('hit');
+                    lowestTile.element.style.animation = 'none';
+                    
+                    // Update score and combo
+                    let scoreMultiplier = 10;
+                    if (selectedBooster === 2) { // Combo booster
+                        scoreMultiplier = 15;
+                    }
+                    // Handle faculty-specific scoring
+                    let basePoints = 10;
+                    if(gameState.currentFaculty === 'culinary' && selectedBooster === 1) {
+                        basePoints = 15; // Flavor Boost
+                    }
+                    if(gameState.currentFaculty === 'tourism' && selectedBooster === 1) {
+                        basePoints *= 2; // First Class
+                    }
+                    
+                    gameState.score += basePoints * (gameState.combo + 1);
+                    
+                    // Automatic hits for culinary sous chef
+                    if(gameState.currentFaculty === 'culinary' && selectedBooster === 0) {
+                        setTimeout(() => {
+                            const nextTile = findNextTile(columnIdx);
+                            if(nextTile) {
+                                handleAutoHit(nextTile);
+                            }
+                        }, 200);
+                    }
+                    gameState.combo++;
+                    if (gameState.combo > gameState.maxCombo) {
+                        gameState.maxCombo = gameState.combo;
+                    }
+                    
+                    document.getElementById('score').textContent = gameState.score;
+                    document.getElementById('combo').textContent = gameState.combo;
+                    
+                    // Remove tile after hit animation
+                    setTimeout(() => {
+                        if (lowestTile.element.parentNode) {
+                            lowestTile.element.parentNode.removeChild(lowestTile.element);
+                        }
+                    }, 200);
+                } else {
+                    // Missed - too early
+                    gameOver();
+                }
+            } else {
+                // Missed - wrong column
+                gameState.combo = 0;
+                document.getElementById('combo').textContent = gameState.combo;
+            }
+        }
+        
+        // Game over
+        function gameOver() {
+            if (!gameState.running) return;
+            
+            gameState.running = false;
+            clearInterval(gameState.tileInterval);
+            
+            // Clear all tiles
+            document.querySelectorAll('.tile').forEach(tile => {
+                tile.classList.remove('active');
+                tile.classList.add('missed');
+            });
+            
+            // Show game over screen
+            document.getElementById('final-score').textContent = gameState.score;
+            document.getElementById('final-combo').textContent = gameState.maxCombo;
+            document.getElementById('game-over').classList.remove('hidden');
+            
+            // Remove controls
+            if (gameState.pressHandler) {
+                document.removeEventListener('keydown', gameState.pressHandler);
+                gameState.pressHandler = null;
+            }
+            
+            document.querySelectorAll('.column').forEach(col => {
+                col.removeEventListener('click', handleTouch);
+            });
+        }
+        
+        // End game manually
+        function endGame() {
+            gameOver();
+            document.getElementById('game-over').classList.add('hidden');
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('faculty-selector').classList.remove('hidden');
+            document.body.className = 'min-h-screen flex flex-col items-center justify-center p-4';
+        }
+        
+        // Initialize controls
+        function initControls() {
+            // Keyboard controls
+            gameState.pressHandler = (e) => {
+                if (['a', 's', 'd', 'f'].includes(e.key.toLowerCase())) {
+                    handlePress(e.key.toLowerCase());
+                }
+            };
+            document.addEventListener('keydown', gameState.pressHandler);
+
+            // Touch controls (multi-touch)
+            const columns = document.querySelectorAll('.column');
+
+            // Remove any previous listeners to avoid duplicates
+            columns.forEach(col => {
+                col.replaceWith(col.cloneNode(true));
+            });
+
+            // Re-select columns after cloning
+            const freshColumns = document.querySelectorAll('.column');
+
+            // Attach touchstart for multi-touch
+            freshColumns.forEach(col => {
+                col.addEventListener('touchstart', function(e) {
+                    e.preventDefault(); // Prevent scrolling
+                    for (let i = 0; i < e.changedTouches.length; i++) {
+                        const touch = e.changedTouches[i];
+                        // Get the element at the touch point
+                        const touchedElem = document.elementFromPoint(touch.clientX, touch.clientY);
+                        if (touchedElem) {
+                            // Find the closest column ancestor
+                            const columnElem = touchedElem.closest('.column');
+                            if (columnElem && columnElem.dataset.key) {
+                                handlePress(columnElem.dataset.key);
+                            }
+                        }
+                    }
+                }, { passive: false });
+            });
+
+            // Also allow single tap/click for desktop
+            freshColumns.forEach(col => {
+                col.addEventListener('click', function(e) {
+                    const key = col.dataset.key;
+                    handlePress(key);
+                });
+            });
+        }
+        
+        function findNextTile(col) {
+            for(let i = 0; i < gameState.tiles.length; i++) {
+                const tile = gameState.tiles[i];
+                if(tile.column === col && tile.dataset.active === 'true' && !tile.hit) {
+                    return tile;
+                }
+            }
+            return null;
+        }
+        
+        function handleAutoHit(tile) {
+            tile.hit = true;
+            tile.dataset.active = 'false';
+            tile.classList.remove('active');
+            tile.classList.add('hit');
+            tile.style.animation = 'none';
+            
+            gameState.score += 5;
+            document.getElementById('score').textContent = gameState.score;
+        }
+        
+        function randomColor() {
+            const colors = ['#FF5252', '#FF4081', '#E040FB', '#7C4DFF', '#536DFE', '#448AFF', '#40C4FF', '#18FFFF', '#64FFDA', '#69F0AE'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+    </script>
 </body>
 </html>
