@@ -1,24 +1,80 @@
-<!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Piano Tiles Game</title>
-  <link rel="stylesheet" href="style.css" />
+    <title>Piano-Tiles</title>
+<style>
+    #btn{
+        position: absolute;
+        top: 700;
+        left: 36%;
+        width: 300px;
+        height: 50px;
+    }
+    #start_btn {
+        position: relative;
+        top: 50%;
+        left: 50%;
+        margin-left: -50px;
+        margin-top: -50px;
+        display: block;
+        font-size: 1.3em;
+        width: 100px;
+        height: 100px;
+        font-weight: light;
+        font-family: 'Trebuchet MS', sans-serif;
+        text-align: center;
+        line-height: 100px;
+        letter-spacing: -1px;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        background: #5a99d4;
+        cursor: pointer;
+        box-shadow: 0 0 0 0 rgba(#5a99d4, .5);
+        transition: width 0.9s, height 0.9s ;
+    }
+    #start_btn:hover{
+        width: 105px;
+        height: 105px;
+    }
+    body {
+        background: #36D1DC;  /* fallback for old browsers */
+        background: -webkit-linear-gradient(to right, #5B86E5, #36D1DC);  /* Chrome 10-25, Safari 5.1-6 */
+        background: linear-gradient(to right, #5B86E5, #36D1DC); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+    }
+
+</style>
 </head>
 <body>
-  <div class="hamburger" id="hamburger">&#9776;</div>
-  <div class="menu-overlay" id="menuOverlay">
-    <h1>Piano Tiles Game</h1>
-    <button id="playBtn">Play</button>
-    <button id="restartBtn" style="display:none;">Restart</button>
-    <button id="menuBtn" style="display:none;">Menu</button>
-    <select id="songSelect">
-      <option value="song1">Song 1</option>
-      <option value="song2">Song 2</option>
-    </select>
+    <canvas id="score_bar" width="300" height="70" style="position: absolute; left:36%;top: 0;"></canvas>
+    <canvas id="background" width="300" height="600" style="position: absolute; top:70; left: 36%;" ></canvas>
+    <canvas id="piano" width="300" height="600" style="position: absolute; top:70; left: 36%;"></canvas>
+    <audio  id="music" src="MUSIC.mp3" loop ></audio>
+
+    <div id="btn">
+        <span id="start_btn">START</span>
+    </div>
+    <!-- Hamburger Menu -->
+<div id="hamburger-menu" style="position: absolute; top: 15px; left: 15px; z-index: 100;">
+  <div id="hamburger-icon" style="width: 30px; height: 30px; cursor: pointer;">
+    <div style="width: 100%; height: 5px; background: #333; margin: 6px 0;"></div>
+    <div style="width: 100%; height: 5px; background: #333; margin: 6px 0;"></div>
+    <div style="width: 100%; height: 5px; background: #333; margin: 6px 0;"></div>
   </div>
-  <div class="game-container" id="gameContainer"></div>
-  <script src="script.js"></script>
+  <div id="menu-overlay" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:101;">
+    <div style="background:#fff; width:200px; padding:20px; margin:40px auto; border-radius:8px;">
+      <h3>Menu</h3>
+      <ul style="list-style:none; padding:0;">
+        <li><button onclick="location.reload()">Restart</button></li>
+        <li><button onclick="document.getElementById('menu-overlay').style.display='none'">Close</button></li>
+      </ul>
+    </div>
+  </div>
+</div>
+    <script src="game.js"></script>
+<script>
+ 
+
+</script>
 </body>
 </html>
